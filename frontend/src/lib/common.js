@@ -133,7 +133,7 @@ export async function addBook(data) {
 
   try {
     return await axios({
-      method: 'post',
+      method: 'POST',
       url: `${API_ROUTES.BOOKS}`,
       data: bodyFormData,
       headers: {

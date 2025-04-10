@@ -1,9 +1,13 @@
 const express = require('express');
 const app = express();
+const dotenv = require('dotenv');
+dotenv.config();
 const mongoose = require('mongoose');
-const stuffRoutes = require('./routes/stuff');
+const path = require('path');
+const bookRoutes = require('./routes/book');
+const userRoutes = require('./routes/user');
 
-mongoose.connect('mongodb+srv://tango:gveDsM3pXDjxgyZC@cluster0.zojtas2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+mongoose.connect(`mongodb+srv://${process.env.MONGOOSE_USER}:${process.env.MONGOOSE_PASSWORD}@${process.env.MONGOOSE_CLUSTER}/?retryWrites=true&w=majority&appName=Cluster0`,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
@@ -18,6 +22,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/api/books', stuffRoutes);
+app.use('/api/books', bookRoutes);
+app.use('/api/auth', userRoutes);
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 module.exports = app;
