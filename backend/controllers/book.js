@@ -22,24 +22,40 @@ exports.createBook = (req, res, next) => {
 };
 
 exports.createRating = (req, res, next) => {
-    
     Book.findOne({_id:req.params.id})
-        .then(book => {
-            var userVote = 0;
-            for (let i=0; i<book.ratings.length; i++)
-                if(book.ratings[i].userId == req.auth.userId){
-                    userVote = 1;
-                    res.status(401).json({message:'no authorized'})
-                }
-            if(userVote != 1){
-                const newRating = {grade: `${req.body.rating}`, userId: `${req.auth.userId}`}
-                book.updateOne(
-                    {$addToSet : {ratings : newRating}})
-                        .then(() => res.status(200).json(book))
-                        .catch(error => res.status(400).json({error}));
+    .then(book => {
+        var userVote = 0;
+        for (let i=0; i<book.ratings.length; i++)
+            if(book.ratings[i].userId == req.auth.userId){
+                userVote = 1;
+                res.status(401).json({message:'no authorized'})
             }
-        })
-        .catch(error => res.status(500).json({error}));
+        if(userVote != 1){
+            const newRating = {grade: `${req.body.rating}`, userId: `${req.auth.userId}`}
+            book.updateOne(
+                {$addToSet : {ratings : newRating}})
+                    .then(() => {
+                        Book.findOne({_id:req.params.id})
+                            .then((bookAverage) => {
+                                var averageTotalVote = 0;
+                                var averageRating = 0;
+                                for (let i=0; i<bookAverage.ratings.length; i++)
+                                    averageTotalVote += bookAverage.ratings[i].grade;
+                                    averageRating = averageTotalVote / bookAverage.ratings.length;
+                                    bookAverage.updateOne({averageRating})
+                                        .then(()=> {
+                                            Book.findOne({_id:req.params.id})
+                                                .then(book => res.status(200).json(book))
+                                                .catch(error => res.status(404).json({error}));
+                                        })
+                                        .catch (error => res.status(500).json ({error}));
+                            })
+                            .catch(error => res.status (500).json({error}))
+                    })
+                    .catch(error => res.status(400).json({error}));
+        }
+    })
+    .catch(error => res.status(500).json({error}));
 };
 
 exports.getAllBooks = (req, res, next) => {
