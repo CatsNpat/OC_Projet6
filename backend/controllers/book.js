@@ -71,9 +71,9 @@ exports.getOneBooks = (req, res, next) => {
 };
 
 exports.getBestRating = (req, res, next) => {
-    Book.find()
-    .then(books => res.status(200).json(books))
-    .catch(error => res.status(400).json({error}));
+    Book.find().sort({ averageRating: -1 }).limit(3)
+        .then(books => res.status(200).json(books))
+        .catch(error => res.status(400).json({error}));
 };
 
 exports.modifyBook = (req, res, next) => {
@@ -93,9 +93,7 @@ exports.modifyBook = (req, res, next) => {
                         .catch(error => res.status(400).json({error}));
                 }
             })
-            .catch((error) => {
-                res.status(400).json({error})
-            });
+            .catch((error) => {res.status(400).json({error})});
 };
 
 exports.deleteOneBook = (req, res, next) => {
