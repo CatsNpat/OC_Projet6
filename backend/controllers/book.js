@@ -54,6 +54,7 @@ exports.createRating = (req, res, next) => {
                                 for (let i=0; i<bookAverage.ratings.length; i++)
                                     averageTotalVote += bookAverage.ratings[i].grade;
                                     averageRating = averageTotalVote / bookAverage.ratings.length;
+                                    averageRating = averageRating.toFixed(1);
                                     bookAverage.updateOne({averageRating})
                                         .then(()=> {
                                             Book.findOne({_id:req.params.id})
